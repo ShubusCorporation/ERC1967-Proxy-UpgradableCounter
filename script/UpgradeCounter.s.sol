@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {Script, console} from "forge-std/Script.sol";
+//import {console} from "forge-std/Script.sol";
 import {CounterV1} from "../src/CounterV1.sol";
 import {CounterV2} from "../src/CounterV2.sol";
-import {ERC1967Proxy} from "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {Helper} from "./Helper.s.sol";
 
 //Импортируем данный контракт, он поможет нам в работе с недавно задеплоенными контрактами
@@ -38,7 +37,9 @@ contract UpgradeCounter is Helper {
         //payable - это важный параметр, не забываем про него
         //(нюанс проки-контрактов)
         CounterV1 proxy = CounterV1(payable(proxyAddress));
-        proxy.upgradeToAndCall(address(newCounter), "");
+        // добавляем
+        bytes memory data = abi.encodeWithSignature("initialize()");
+        proxy.upgradeToAndCall(address(newCounter), data);
         vm.stopBroadcast();
         return address(proxy);
     }

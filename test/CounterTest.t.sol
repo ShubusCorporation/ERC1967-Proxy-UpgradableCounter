@@ -7,7 +7,7 @@ import {UpgradeCounter} from "../script/UpgradeCounter.s.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {CounterV1} from "../src/CounterV1.sol";
 import {CounterV2} from "../src/CounterV2.sol";
-import {Helper} from "../script/Helper.s.sol";
+//import {Helper} from "../script/Helper.s.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /**
@@ -58,9 +58,9 @@ contract DeployAndUpgradeTest is Test {
     function testUpgradeWorks() public {
         address proxyAddress = deployCounter.deployCounter();
 
-        CounterV2 Counter2 = new CounterV2();
+        CounterV2 counter2 = new CounterV2();
 
-        address proxy = upgradeCounter.upgradeCounter(proxyAddress, address(Counter2));
+        address proxy = upgradeCounter.upgradeCounter(proxyAddress, address(counter2));
 
         uint256 expectedValue = 2;
         assertEq(expectedValue, CounterV2(proxy).version());
@@ -79,7 +79,7 @@ contract DeployAndUpgradeTest is Test {
      * деплоить или вызывать в реальных транзакциях
      */
 
-    function testForkTotalSupply() public {
+    function testForkTotalSupply() public view {
         //За пример возьмём такой параметр токенов, как decimals
         //Это может быть абсолютно любой другой параметр
         //Главное, чтобы он хранился в какой-то сети и нам его нужно
