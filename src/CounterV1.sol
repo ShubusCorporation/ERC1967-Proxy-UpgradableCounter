@@ -19,6 +19,11 @@ contract CounterV1 is Initializable, OwnableUpgradeable, UUPSUpgradeable {
      * так как мы работаем с обновляемым контрактом
      */
     constructor() {
+        /*
+            Это блокирует вызов initializer на самой реализации, если кто-то попытается напрямую её дернуть.
+            Но через прокси _initialized ещё равен 0 (по умолчанию в прокси storage), 
+            потому что _disableInitializers() не меняет storage прокси.
+        */
         _disableInitializers();
     }
 
