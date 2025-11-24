@@ -370,3 +370,95 @@ ERC1967Proxy.sol:ERC1967Proxy — путь и имя контракта
 Alchemy — это сервис, предоставляющий инфраструктуру для взаимодействия с блокчейнами. Он предлагает высокоскоростные и надежные RPC-узлы для различных блокчейнов, включая Ethereum и другие сети. Вместо того, чтобы самостоятельно развертывать собственный узел Ethereum, вы можете использовать Alchemy для более удобного доступа к блокчейну через их API. Это позволяет вам делать запросы и отправлять транзакции в блокчейн без необходимости управления инфраструктурой.
 
 Alchemy предоставляет URL RPC, как в вашем примере (https://eth-sepolia.g.alchemy.com/v2/i-DWPJsNvn7o-1Zo89HQW), который можно использовать для взаимодействия с сетью Sepolia через их серверы.
+
+
+----------------------------------------------------------------------------------------------
+
+Тестирование с помощью Web3
+
+3️⃣ if (window.ethereum) {...}
+window.ethereum — это объект, который предоставляет Metamask (или другой Ethereum-совместимый кошелёк).
+Если он существует, значит пользователь имеет Metamask (или другой Web3 кошелёк) и мы можем с ним взаимодействовать.
+
+4️⃣ await window.ethereum.send('eth_requestAccounts');
+Этот вызов запрашивает у Metamask разрешение на доступ к аккаунтам пользователя.
+Metamask покажет всплывающее окно с запросом «Разрешить этому сайту доступ к вашим аккаунтам».
+Пользователь должен подтвердить. Без этого шага браузер не даст нам узнать адрес пользователя.
+
+5️⃣ window.web3 = new Web3(window.ethereum);
+Здесь создаётся объект web3, который позволяет взаимодействовать с блокчейном Ethereum через Metamask.
+Web3 — это библиотека JavaScript для работы с Ethereum.
+window.ethereum передаётся в Web3 как провайдер — это мост между сайтом и кошельком пользователя.
+
+6️⃣ var accounts = await web3.eth.getAccounts();
+web3.eth.getAccounts() возвращает массив адресов Ethereum, к которым имеет доступ Metamask.
+Обычно массив содержит только один адрес (тот, который выбран в кошельке).
+
+7️⃣ account = accounts[0];
+Мы берём первый адрес из массива и сохраняем его в переменную account.
+Этот адрес и будет адресом кошелька пользователя, который можно использовать для подписей, транзакций и т.д.
+
+<!DOCTYPE html> 
+<html>
+
+<!-- 
+   Start server: python -m http.server
+   Old: web3.eth.getStorageAt('0x119c20f0a3133f08997b40ba75d7f97d22420253', 0, (e, v) => console.log(v))
+   New: web3.eth.getStorageAt('0xd79B1870992324c2755b4C245dA8206FE1906587', 0).then(console.log)
+-->
+
+<head>
+    <meta charset="utf-8">
+    <title>Mint an NFT</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+</head>
+
+<div>
+    <p>
+        Wallet address:
+        <span id="wallet-address"></span>
+    </p>
+    <p>
+        Total supply:
+        <span id="total-supply"></span>
+    </p>
+    <button id="mint">
+        Web3
+    </button>
+</div>
+
+<script type="text/javascript">
+    // 1. Connect metamask to our site. Get the user's address 
+    var account = null;
+
+    (async () => {
+        if (window.ethereum)
+        {
+            await window.ethereum.send('eth_requestAccounts');
+            window.web3 = new Web3(window.ethereum);
+
+            var accounts = await web3.eth.getAccounts();
+            account = accounts[0];
+            document.getElementById('wallet-address').textContent = account;
+        }
+    })();
+</script>
+</body>
+</html>
+
+
+run: python -m http.server
+go: http://localhost:8000/test/
+
+console:
+Read value from the slot0:
+web3.eth.getStorageAt('0xd79B1870992324c2755b4C245dA8206FE1906587', 0).then(console.log) // CounterV2
+web3.eth.getStorageAt('0x3dB60F3D138cA31c82783A283368Fe7cf27E7F1A', 0).then(console.log) // Proxy
+
+Call the `getValue` function from the `CounterV2` contract:
+
+let abi = '[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"target","type":"address"}],"name":"AddressEmptyCode","type":"error"},{"inputs":[{"internalType":"address","name":"implementation","type":"address"}],"name":"ERC1967InvalidImplementation","type":"error"},{"inputs":[],"name":"ERC1967NonPayable","type":"error"},{"inputs":[],"name":"FailedCall","type":"error"},{"inputs":[],"name":"InvalidInitialization","type":"error"},{"inputs":[],"name":"NotInitializing","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"inputs":[],"name":"UUPSUnauthorizedCallContext","type":"error"},{"inputs":[{"internalType":"bytes32","name":"slot","type":"bytes32"}],"name":"UUPSUnsupportedProxiableUUID","type":"error"},{"anonymous":false,"inputs":[{"indexed":false,"internalType":"uint64","name":"version","type":"uint64"}],"name":"Initialized","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"implementation","type":"address"}],"name":"Upgraded","type":"event"},{"inputs":[],"name":"UPGRADE_INTERFACE_VERSION","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"getValue","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"increment","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"initialize","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"proxiableUUID","outputs":[{"internalType":"bytes32","name":"","type":"bytes32"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newImplementation","type":"address"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"upgradeToAndCall","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"version","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"pure","type":"function"}]';
+
+abi = JSON.parse(abi);
+let counerV2 = new web3.eth.Contract(abi, "0xd79B1870992324c2755b4C245dA8206FE1906587");
+counerV2.methods.getValue().call().then(console.log);
